@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Scan RFID v1.2</string>
+    <string name="tab_text_1">Escanear Tag</string>
+    <string name="tab_text_2">Editar Tag</string>
+    <string name="tab_text_3">Configuracion</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hola fragmento en blanco</string>
+
+    <string name="drawer_open">Abrir Menú</string>
+    <string name="drawer_close">Cerrar Menú</string>
+    <string name="menu_icon">Icono de menú</string>
+
+    <string name="conf_empr">Empresa</string>
+    <string name="conf_local">Local</string>
+    <string name="conf_power">Potencia [1-33]</string>
+
+
+    <string name="info_result">Resultado:</string>
+    <string name="txtepc">Tag ID:</string>
+    <string name="bankid">Memoria:</string>
+    <string name="memptr">Dirección:</string>
+    <string name="memlen">Longitud:</string>
+
+    <string name="readstr">Lectura:</string>
+    <string name="writestr">Escritura:</string>
+    <string name="butnread">Lectura</string>
+    <string name="butnwrite">Escribir</string>
+    <string name="btn_lock">Cerrar</string>
+    <string name="btn_checklock">Check bloqueo</string>
+
+    <string name="tvCountOfTags">Número de tags</string>
+    <string name="tvTagCount">Total</string>
+    <string name="btClear">Limpiar data</string>
+    <string name="ReadTime">Tiempo(ms):</string>
+    <string name="tvTagUii">Tag</string>
+    <string name="tvTagLen">Longitud</string>
+    <string name="rbInventorySingle">Uno</string>
+    <string name="rbInventoryLoop">Ciclo</string>
+    <string name="btInventory">Inicio</string>
+    <string name="btn_stop_Inventory">Detener</string>
+    <string name="title_stoping_Inventory">Parar</string>
+    <string name="btStoping">Parar</string>
+    <string name="_6b_tag_activity">6B tag</string>
+    <string name="scan_info">Información Escaneada</string>
+    <string name="carry_tid">Leer Tid</string>
+    <string name="select_tag">Elegir tag:</string>
+    <string name="access_password">Clase de acceso:</string>
+    <string name="read_tags">Información de Tags:</string>
+    <string name="tag_hint">Por favor ingresar</string>
+    <string name="current_power">"Potencia actual: "</string>
+    <string name="enter_power">Potencia de entrada</string>
+    <string name="get_power">Obtener</string>
+    <string name="set_power">Poner</string>
+    <string name="firmware">Firmware:v</string>
+    <string name="set_power_fail">set power fallo</string>
+    <string name="set_power_success">Exito poner potencia</string>
+    <string name="get_power_fail">Falla de potencia</string>
+    <string name="get_power_success">Exito obtuvo potencia</string>
+    <string name="write_tag_success">Ok al escribir datos</string>
+    <string name="write_tag_fail">Error al escribir datos</string>
+    <string name="write_epc_first">Ingrese el contenido del EPC que se escribirá primero</string>
+    <string name="read_tag_success">Exito al leer tag</string>
+    <string name="read_tag_fail">Error al leer tag</string>
+    <string name="content_not_null">Ingrese un valor</string>
+    <string name="power_value_not_allow">Valor de potencia incompatible</string>
+    <string name="get_deviceID">Obtener ID</string>
+    <string name="start_frency">Frecuencia inicio</string>
+    <string name="frency_step">Intervalo de frecuencia puntos</string>
+    <string name="frency_number">Número de puntos de frecuencia</string>
+    <string name="set_frency">Establecer banda</string>
+    <string name="get_frency">Obtener banda</string>
+    <string name="mask_area">Area</string>
+    <string name="mask_start">Dirección inicio</string>
+    <string name="mask_len">Longitud</string>
+    <string name="mask_data">Datos</string>
+    <string name="set_mask">Poner mascara</string>
+    <string name="clear_mask">Limpiar mascara</string>
+    <string name="set_range">Poner rango</string>
+    <string name="get_range">Obtener rango</string>
+    <string name="gj_no_support">Firmware no soportado</string>
+    <string name="set_success">Configuracion ok</string>
+    <string name="set_fail">Cofiguracion error</string>
+    <string name="get_fail">Adquisición fallida</string>
+    <string name="write_t_s">\"Ok al escribir tag \"</string>
+    <string name="write_t_f">\"Error al escribir tag \"</string>
+</resources>

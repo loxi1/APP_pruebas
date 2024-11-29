@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <!-- Encabezado -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Despacho de prendas"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Campo PO -->
+    <EditText
+        android:id="@+id/et_po"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="PO"
+        android:inputType="number"
+        android:backgroundTint="@color/gray"
+        android:padding="12dp"
+        android:layout_marginTop="16dp"
+        android:enabled="false"
+        android:background="@drawable/rounded_edittext" />
+
+    <!-- Contador y Botón Iniciar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tv_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="120"
+            android:textSize="48sp"
+            android:textColor="@color/black"
+            android:fontFamily="sans-serif-medium" />
+
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Iniciar"
+            android:backgroundTint="@color/red"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:textColor="@color/white"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Lista RFID -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_rfid_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/rounded_background" />
+
+    <!-- Botón Guardar -->
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@color/white"
+        android:layout_marginTop="16dp"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

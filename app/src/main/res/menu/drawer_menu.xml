@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_scan"
+        android:title="Escanear"
+        android:icon="@drawable/icon1" />
+    <item
+        android:id="@+id/nav_configure"
+        android:title="Configurar"
+        android:icon="@drawable/icon3" />
+    <item
+        android:id="@+id/nav_pendings"
+        android:title="Configurar"
+        android:icon="@drawable/icon2" />
+    <item
+        android:id="@+id/nav_exit"
+        android:title="Salir"
+        android:icon="@drawable/icon4" />
+</menu>

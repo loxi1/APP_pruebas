@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/title_site"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SITIO"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Combos -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <Spinner
+                android:id="@+id/spinner_empresa"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:prompt="@string/conf_empr"
+                android:background="@drawable/spinner_border"
+                android:spinnerMode="dropdown" />
+
+            <Spinner
+                android:id="@+id/spinner_local"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:prompt="@string/conf_local"
+                android:background="@drawable/spinner_border"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
+
+        <!-- Línea divisoria -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#cccccc"
+            android:layout_marginVertical="20dp" />
+
+        <!-- Título: Configuración -->
+        <TextView
+            android:id="@+id/title_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="POTENCIA"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Potencia Formulario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/conf_power" />
+
+            <EditText
+                android:id="@+id/edit_potencia"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="0"
+                android:inputType="number" />
+
+        </LinearLayout>
+
+        <!-- Línea divisoria -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#cccccc"
+            android:layout_marginVertical="20dp" />
+
+        <!-- Título: Mi Dispositivo -->
+        <TextView
+            android:id="@+id/title_device"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MI DISPOSITIVO"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Dispositivo Formulario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Dispositivo"
+                android:gravity="center" />
+
+            <EditText
+                android:id="@+id/edit_device"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:hint="Nombre" />
+
+        </LinearLayout>
+
+        <!-- Botón Guardar -->
+        <Button
+            android:id="@+id/btn_save_site"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/azul_300"
+            android:textColor="@color/white"
+            android:shadowRadius="2"
+            android:text="Guardar" />
+    </LinearLayout>
+</ScrollView>
