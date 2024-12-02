@@ -90,8 +90,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_marginTop="4dp"
-                android:backgroundTint="@color/verde_200"
                 android:background="@color/verde_200"
+                android:backgroundTint="@color/verde_200"
                 android:text="@string/btInventory"
                 android:textColor="@color/white"
                 android:textSize="18sp"
@@ -176,6 +176,14 @@
                     android:padding="8dp"
                     android:text="DATA"
                     android:textStyle="bold" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="CANT"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -215,6 +223,7 @@
         android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="8dp"
         android:text="Guardar"
+        android:visibility="gone"
         android:textSize="20sp"
         android:backgroundTint="@color/azul_300"
         android:textColor="@android:color/white"
