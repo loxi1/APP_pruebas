@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
     private int _esEmpresa = -1;
     private int _esLocal = -1;
 
+    private static final String TAG_SCAN_FRAGMENT = "TAG_SCAN_FRAGMENT";
+    private static final String TAG_CONF_FRAGMENT = "TAG_CONF_FRAGMENT";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,22 +100,11 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
-        power_val = sharedPreferences.getInt("OUTPUT_POWER", 15);
-        _esEmpresa = sharedPreferences.getInt("ES_EMPRESA", -1);
-        _esLocal = sharedPreferences.getInt("ES_LOCAL", -1);
+        loadSharedPreferences();
 
         // Cargar el fragmento inicial
         if (savedInstanceState == null) {
-            if(_esLocal == -1 || _esEmpresa == -1) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new ConfFragment())
-                        .commit();
-            } else {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, TagScanFragment.newInstance(this))
-                        .commit();
-            }
+            loadInitialFragment();
         }
 
         // Agregar manejo de clics en los elementos del menú
@@ -119,11 +112,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleMenuClick(int position) {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         switch (position) {
             case 0: // Escanear
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, TagScanFragment.newInstance(this))
-                        .commit();
+                if (!(currentFragment instanceof TagScanFragment)) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, TagScanFragment.newInstance(this), TAG_SCAN_FRAGMENT)
+                            .commit();
+                }
                 break;
 
             /*case 1: // Site (anteriormente Configurar)
@@ -135,9 +131,11 @@ public class MainActivity extends AppCompatActivity {
 
             case 1: // Configuracion
                 // Aquí puedes cargar otro fragmento o actividad
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new ConfFragment())
-                        .commit();
+                if (!(currentFragment instanceof ConfFragment)) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new ConfFragment(), TAG_CONF_FRAGMENT)
+                            .commit();
+                }
                 break;
 
             /*case 3:// Pendientes
@@ -270,17 +268,28 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getKeyCode() == 523 &&  event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0){
+        /*if(event.getKeyCode() == 523 &&  event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0){
             //TODO prensa
 
-
+            System.out.println("Me Presiono---->");
 
             return true;
         }else if (event.getKeyCode() == 523 &&  event.getAction() == KeyEvent.ACTION_UP && event.getRepeatCount() == 0){
             //TODO elevar
 
+            System.out.println("Me soloooo---->");
 
-
+            return true;
+        }*/
+        if (event.getKeyCode() == 523 &&  event.getAction() == KeyEvent.ACTION_UP && event.getRepeatCount() == 0){
+            // Obtener instancia del fragmento
+            TagScanFragment tagScanFragment = (TagScanFragment) getSupportFragmentManager().findFragmentByTag("TAG_SCAN_FRAGMENT");
+            if (tagScanFragment != null) {
+                System.out.println("Arriba entro");
+                tagScanFragment.toggleScan();
+                System.out.println("Abajo entro");
+            }
+            System.out.println("Tecla presionada y liberada para alternar escaneo.");
             return true;
         }
         return super.dispatchKeyEvent(event);
@@ -308,5 +317,29 @@ public class MainActivity extends AppCompatActivity {
             return mRfidManager.setOutputPower((byte) power);
         }
         return -1; // Indica error si el mRfidManager no está disponible
+    }
+
+    private void loadSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
+        power_val = sharedPreferences.getInt("OUTPUT_POWER", 15);
+        _esEmpresa = sharedPreferences.getInt("ES_EMPRESA", -1);
+        _esLocal = sharedPreferences.getInt("ES_LOCAL", -1);
+    }
+
+    private void loadInitialFragment() {
+        Fragment fragmentToLoad;
+        String fragmentTag;
+
+        if (_esLocal == -1 || _esEmpresa == -1) {
+            fragmentToLoad = new ConfFragment();
+            fragmentTag = TAG_CONF_FRAGMENT;
+        } else {
+            fragmentToLoad = TagScanFragment.newInstance(this);
+            fragmentTag = TAG_SCAN_FRAGMENT;
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, fragmentToLoad, fragmentTag)
+                .commit();
     }
 }
