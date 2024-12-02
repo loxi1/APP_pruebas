@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ListView drawerList;
     private ActionBarDrawerToggle drawerToggle;
-    private String[] menuItems = {"Escanear", "Configurar", "Salir"};
-    private int[] menuIcons = {R.drawable.icon1, R.drawable.icon3, R.drawable.icon4};  // Aquí se pasan los iconos
+    private String[] menuItems = {"Escanear", "Escanera x PO", "Configurar", "Salir"};
+    private int[] menuIcons = {R.drawable.icon1, R.drawable.po_scan, R.drawable.icon3, R.drawable.icon4};  // Aquí se pasan los iconos
     public static final String TAG = "usdk";
 
     public  boolean RFID_INIT_STATUS = false;
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private int _esLocal = -1;
 
     private static final String TAG_SCAN_FRAGMENT = "TAG_SCAN_FRAGMENT";
+    private static final String TAG_SCAN_FRAGMENT_SN_PO = "TAG_SCAN_FRAGMENT_SN_PO";
     private static final String TAG_CONF_FRAGMENT = "TAG_CONF_FRAGMENT";
 
 
@@ -115,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         switch (position) {
             case 0: // Escanear
-                if (!(currentFragment instanceof TagScanFragment)) {
+                if (!(currentFragment instanceof TagScanFragmentSNPO)) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, TagScanFragment.newInstance(this), TAG_SCAN_FRAGMENT)
+                            .replace(R.id.fragment_container, TagScanFragmentSNPO.newInstance(this), TAG_SCAN_FRAGMENT_SN_PO)
                             .commit();
                 }
                 break;
@@ -129,7 +130,15 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
                 break;*/
 
-            case 1: // Configuracion
+            case 1: // Escanear PO
+                if (!(currentFragment instanceof TagScanFragment)) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, TagScanFragment.newInstance(this), TAG_SCAN_FRAGMENT)
+                            .commit();
+                }
+                break;
+
+            case 2: // Configuracion
                 // Aquí puedes cargar otro fragmento o actividad
                 if (!(currentFragment instanceof ConfFragment)) {
                     getSupportFragmentManager().beginTransaction()
@@ -142,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 // Aquí puedes cargar otro fragmento o actividad
                 break;*/
 
-            case 2: // Salir
+            case 3: // Salir
                 finish();
                 break;
         }
@@ -283,14 +292,23 @@ public class MainActivity extends AppCompatActivity {
         }*/
         if (event.getKeyCode() == 523 &&  event.getAction() == KeyEvent.ACTION_UP && event.getRepeatCount() == 0){
             // Obtener instancia del fragmento
-            TagScanFragment tagScanFragment = (TagScanFragment) getSupportFragmentManager().findFragmentByTag("TAG_SCAN_FRAGMENT");
-            if (tagScanFragment != null) {
+            TagScanFragment tagScanFragment = (TagScanFragment) getSupportFragmentManager().findFragmentByTag(TAG_SCAN_FRAGMENT);
+            if (tagScanFragment != null && tagScanFragment.isVisible()) {
                 System.out.println("Arriba entro");
                 tagScanFragment.toggleScan();
                 System.out.println("Abajo entro");
+                return  true;
+            }
+
+            TagScanFragmentSNPO tagScanFragmentSNPO = (TagScanFragmentSNPO) getSupportFragmentManager().findFragmentByTag("TAG_SCAN_FRAGMENT_SN_PO");
+            if (tagScanFragmentSNPO != null && tagScanFragmentSNPO.isVisible()) {
+                System.out.println("Arriba entro");
+                tagScanFragmentSNPO.toggleScan();
+                System.out.println("Abajo entro");
+                return  true;
             }
             System.out.println("Tecla presionada y liberada para alternar escaneo.");
-            return true;
+            return false;
         }
         return super.dispatchKeyEvent(event);
     }
@@ -334,8 +352,8 @@ public class MainActivity extends AppCompatActivity {
             fragmentToLoad = new ConfFragment();
             fragmentTag = TAG_CONF_FRAGMENT;
         } else {
-            fragmentToLoad = TagScanFragment.newInstance(this);
-            fragmentTag = TAG_SCAN_FRAGMENT;
+            fragmentToLoad = TagScanFragmentSNPO.newInstance(this);
+            fragmentTag = TAG_SCAN_FRAGMENT_SN_PO;
         }
 
         getSupportFragmentManager().beginTransaction()
