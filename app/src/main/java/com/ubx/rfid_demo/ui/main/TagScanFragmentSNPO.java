@@ -114,7 +114,6 @@ public class TagScanFragmentSNPO extends Fragment {
                             System.out.println("Btn era Detener");
                             scanStartBtn.setText(getString(R.string.btInventory));
                             setScanStatus(false );
-                            clean_scan();
                         }
                     }else {
                         Log.d(TAG, "scanStartBtn  RFID no está inicializado "  );
@@ -330,7 +329,7 @@ public class TagScanFragmentSNPO extends Fragment {
                 {
                     if (mapData.containsKey(mapContainStrFinal)) {
                         TagScan tagScan = mapData.get(mapContainStrFinal);
-                        //tagScan.setCount(mapData.get(mapContainStrFinal).getCount() + 1);
+                        tagScan.setCount(mapData.get(mapContainStrFinal).getCount() + 1);
                         //tagScan.setTid(TID);
                         //tagScan.setRssi(strRSSI);
                         System.out.println("Muaa");

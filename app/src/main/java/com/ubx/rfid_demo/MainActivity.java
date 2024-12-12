@@ -36,7 +36,6 @@ import android.widget.ListView;
 import com.ubx.rfid_demo.db.DBHelper;
 import android.content.ContentValues;
 
-import android.os.Environment;
 
 public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_SCAN_FRAGMENT = "TAG_SCAN_FRAGMENT";
     private static final String TAG_SCAN_FRAGMENT_SN_PO = "TAG_SCAN_FRAGMENT_SN_PO";
     private static final String TAG_CONF_FRAGMENT = "TAG_CONF_FRAGMENT";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
 
         SoundTool.getInstance(BaseApplication.getContext()).release();
         RFID_INIT_STATUS = false;

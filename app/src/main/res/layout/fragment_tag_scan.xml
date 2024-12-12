@@ -8,10 +8,11 @@
     tools:context=".ui.main.TagScanFragment">
 
     <!-- CardView para el contador y el campo nropo -->
+    <!-- CardView para las tres columnas -->
     <android.support.v7.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="8dp"
@@ -21,51 +22,79 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:padding="8dp">
 
-            <TextView
-                android:id="@+id/tvCountOfTags"
-                android:layout_width="wrap_content"
+            <!-- Primera columna: Botón -->
+            <Button
+                android:id="@+id/stop_incidencia_btn"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/tvCountOfTags"
-                app:layout_constraintBottom_toTopOf="@+id/scan_count_text"
-                app:layout_constraintEnd_toEndOf="@id/scan_count_text"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:id="@+id/scan_count_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="0"
-                android:textColor="@android:color/holo_red_light"
-                android:textSize="40sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/nropo"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone"
+                android:textColor="@color/white"
+                android:text="@string/btn_incidence_Inventory"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/nropo"
+                app:layout_constraintHorizontal_weight="1"
+                android:backgroundTint="@color/red1"
+                android:background="@color/red1"
+                android:gravity="center" />
 
+            <!-- Segunda columna: nropo -->
             <EditText
                 android:id="@+id/nropo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:hint="N° PO"
+                android:gravity="center"
                 android:inputType="number"
                 android:maxLength="8"
                 android:textColor="#000000"
                 android:textColorHint="#A0A0A0"
-                android:textSize="25sp"
+                android:textSize="20sp"
+                app:layout_constraintStart_toEndOf="@+id/stop_incidencia_btn"
+                app:layout_constraintEnd_toStartOf="@+id/tv_container"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@id/tvCountOfTags"
-                app:layout_constraintHorizontal_bias="0.4"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintHorizontal_weight="1" />
+
+            <!-- Tercera columna: Textos -->
+            <LinearLayout
+                android:id="@+id/tv_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                app:layout_constraintStart_toEndOf="@+id/nropo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_weight="1">
+
+                <TextView
+                    android:id="@+id/tvCountOfTags"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tvCountOfTags"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/scan_count_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@android:color/holo_red_light"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+            </LinearLayout>
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
+
+
+
 
     <!-- CardView para los botones -->
     <android.support.v7.widget.CardView
@@ -95,21 +124,20 @@
                 android:text="@string/btInventory"
                 android:textColor="@color/white"
                 android:textSize="18sp"
-                app:layout_constraintEnd_toStartOf="@id/stop_incidencia_btn"
+                app:layout_constraintEnd_toStartOf="@id/clear_rfid_btn"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/stop_incidencia_btn"
+                android:id="@+id/clear_rfid_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:backgroundTint="@color/red1"
-                android:background="@color/red1"
-                android:text="@string/btn_incidence_Inventory"
-                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
+                android:text="@string/btn_clear_Inventory"
+                android:textColor="@color/black"
+                android:textStyle="bold"
                 android:textSize="18sp"
-                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/scan_start_btn"
                 app:layout_constraintTop_toTopOf="parent" />

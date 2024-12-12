@@ -29,7 +29,7 @@
     <string name="btn_lock">Cerrar</string>
     <string name="btn_checklock">Check bloqueo</string>
 
-    <string name="tvCountOfTags">Número de tags</string>
+    <string name="tvCountOfTags">N° tags</string>
     <string name="tvTagCount">Total</string>
     <string name="btClear">Limpiar data</string>
     <string name="ReadTime">Tiempo(ms):</string>
@@ -38,7 +38,9 @@
     <string name="rbInventorySingle">Uno</string>
     <string name="rbInventoryLoop">Ciclo</string>
     <string name="btInventory">Inicio</string>
-    <string name="btn_stop_Inventory">Detener</string>
+    <string name="btn_stop_Inventory">OK</string>
+    <string name="btn_incidence_Inventory">ERROR</string>
+    <string name="btn_clear_Inventory">Limpiar</string>
     <string name="title_stoping_Inventory">Parar</string>
     <string name="btStoping">Parar</string>
     <string name="_6b_tag_activity">6B tag</string>

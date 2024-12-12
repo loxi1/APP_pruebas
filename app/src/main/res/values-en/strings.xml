@@ -39,6 +39,8 @@
     <string name="rbInventoryLoop">cycle</string>
     <string name="btInventory">start</string>
     <string name="btn_stop_Inventory">stop</string>
+    <string name="btn_incidence_Inventory">INCIDENCIA</string>
+    <string name="btn_clear_Inventory">Limpiar</string>
     <string name="title_stoping_Inventory">stopping</string>
     <string name="btStoping">stopping</string>
     <string name="_6b_tag_activity">6B tag</string>

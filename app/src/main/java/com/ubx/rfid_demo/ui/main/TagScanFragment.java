@@ -36,6 +36,11 @@ import com.ubx.usdk.rfid.util.ErrorCode;
 import com.ubx.usdk.util.QueryMode;
 import com.ubx.usdk.util.SoundTool;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,14 +54,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.os.Environment;
+
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.net.URL;
 
 /**
  * Una simple {@link Fragment} subclass.
@@ -98,13 +101,19 @@ public class TagScanFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_tag_scan, container, false);
     }
 
-    private Button scanStartBtn,btnStartL,btnConnect,btnDisConnect,scanSaveBtn, scanIncidenceBtan;
+    private Button scanStartBtn,btnClear,btnConnect,btnDisConnect,scanSaveBtn, scanIncidenceBtan;
     private CheckBox checkBox;
     private RecyclerView scanListRv;
     private TextView scanCountText,scanTotalText,textFirmware, nroPO;
-    private String LastPO = null, DatePO = null, DateNow = null, HMSPO = null, HMSNow = null, LastFilePO = null, Empresa_ = null, Anexo_ = null;
-    private String LastPO_KO = null, DatePO_KO = null, DateNow_KO = null, HMSPO_KO = null,HMSNow_KO = null, LastFilePO_KO =null;
+    private String LastPO = null, LastFilePO = null, Empresa_ = null, Anexo_ = null;
+    private String LastPO_KO = null,  LastFilePO_KO = null;
     private static final String HEADER = "Empresa,Anexo,PO,Fecha,Hora,RFID";
+
+    public String Authorization="",UrlApi="",ContentType="";
+    public static SharedPreferences sharedpreferences;
+    public static final String MyPREFERENCES = "VGlobal";
+
+    public GlobalClass global;
     @Override
     public void onViewCreated( View view,   Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -115,92 +124,61 @@ public class TagScanFragment extends Fragment {
         scanListRv = view.findViewById(R.id.scan_list_rv);
         scanSaveBtn= view.findViewById(R.id.scan_save_btn);
         scanIncidenceBtan = view.findViewById(R.id.stop_incidencia_btn);
+        btnClear = view.findViewById(R.id.clear_rfid_btn);
 
         scanCountText= view.findViewById(R.id.scan_count_text);
         //scanTotalText= view.findViewById(R.id.scan_total_text);
         textFirmware = view.findViewById(R.id.text_firmware);
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("config", Context.MODE_PRIVATE);
-        Empresa_ = sharedPreferences.getString("EMPRESA","");
-        Anexo_ = sharedPreferences.getString("ANEXO","");
+        SharedPreferences sharedPreferences_ = getActivity().getSharedPreferences("config", Context.MODE_PRIVATE);
+        Empresa_ = sharedPreferences_.getString("EMPRESA","");
+        Anexo_ = sharedPreferences_.getString("ANEXO","");
 
-        directory_KO = new File(Environment.getExternalStorageDirectory(), "RFIDLogs/Incidencia");
-        if (!directory_KO.exists()) {
-            System.out.println("NOOOO Existe la carpeta");
-            directory_KO.mkdirs();
+        System.out.println("Empresa-->"+Empresa_+" Anexo-->"+Anexo_);
+
+        Authorization = new GlobalClass(getActivity()).getApiAuth();
+        UrlApi = new GlobalClass(getActivity()).getUrlApi();
+        ContentType =new GlobalClass(getActivity()).getContentType();
+
+        sharedpreferences = getActivity().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        global = new GlobalClass(getActivity());
+
+        System.out.println("Authorization->"+Authorization+" UrlApi->"+UrlApi+" ContentType->"+ContentType);
+
+        if(!global.isNetworkConnected()){
+            System.out.println("No existe internet");
         } else {
-            System.out.println("SIIII Existe la carpeta");
+            System.out.println("Si existe internet");
         }
+
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity.RFID_INIT_STATUS && scanStartBtn.getText().equals(getString(R.string.btn_stop_Inventory))) {
+                    scanIncidenceBtan.setVisibility(View.GONE);
+                    scanStartBtn.setText(getString(R.string.btInventory));
+                    setScanStatus(false );
+                }
+                clean_scan();
+            }
+        });
 
         scanIncidenceBtan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isAdded()) {
+                if (isAdded() && validarPO(nroPO.getText().toString().trim())) {
                     String nroPOValue_KO = nroPO.getText().toString().trim();
 
-                    if (TextUtils.isEmpty(nroPOValue_KO)) {
-                        Toast.makeText(mActivity,"El número de PO no puede estar vacío",Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (nroPOValue_KO.length() < 8) {
-                        Toast.makeText(mActivity, "El número de PO debe tener más de 8 caracteres", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    currentFile_KO = prepararArchivoCSV(nroPOValue_KO, "RFIDLogs/Incidencia", true);
 
-                    File directory_KO = new File(Environment.getExternalStorageDirectory(), "RFIDLogs/Incidencia");
-                    if (!directory_KO.exists()) {
-                        System.out.println("NOOOO Existe la carpeta");
-                        directory_KO.mkdirs();
-                    } else {
-                        System.out.println("SIIII Existe la carpeta");
-                    }
+                    if (mActivity.RFID_INIT_STATUS && scanStartBtn.getText().equals(getString(R.string.btn_stop_Inventory))) {
+                        scanIncidenceBtan.setVisibility(View.GONE);
+                        scanSaveBtn.setVisibility(View.VISIBLE);
+                        scanStartBtn.setText(getString(R.string.btInventory));
+                        setScanStatus(false );
 
-                    if (mActivity.RFID_INIT_STATUS) {
-                        if (scanStartBtn.getText().equals(getString(R.string.btn_stop_Inventory))) {
-
-                            scanIncidenceBtan.setVisibility(View.GONE);
-                            scanStartBtn.setText(getString(R.string.btInventory));
-                            setScanStatus(false );
-
-                            if(!nroPOValue_KO.equals(LastPO_KO)) {
-                                LastPO_KO = nroPOValue_KO;
-                                DatePO_KO = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                                HMSPO_KO = new SimpleDateFormat("HHmm ss").format(new Date());
-                                HMSPO_KO = HMSPO_KO.replaceAll("\\s+", "");
-                                LastFilePO_KO = "KO_"+LastPO_KO + "_" + DatePO_KO + "_" + HMSPO_KO+ ".csv";
-
-                                currentFile_KO = new File(directory_KO, LastFilePO_KO);
-                                Log.d("FilePath", directory_KO.getAbsolutePath());
-                            }
-
-                            scanSaveBtn.setVisibility(View.VISIBLE);
-
-                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(currentFile_KO, true))) {
-                                writer.write("\uFEFF"); // Escribe el BOM al inicio
-                                if (currentFile_KO.length() == 0) {
-                                    writer.write(HEADER);
-                                    writer.newLine();
-                                }
-                                for (TagScan tag : mapData.values()) {
-                                    if (TempPO_KO.containsKey(tag.getEpc())) {
-                                        System.out.println("Si Existe");
-                                    } else {
-                                        //String line = tag.getEpc() + "," + tag.getTid() + "," + tag.getRssi() + "," + tag.getCount();
-                                        DateNow_KO = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                                        HMSNow_KO = new SimpleDateFormat("HH:mm:ss").format(new Date());
-                                        String line =  Empresa_+ "," +Anexo_+ ","+LastPO_KO + "," + DateNow_KO + "," + HMSNow_KO + "," + tag.getEpc();
-                                        writer.write(line);
-                                        writer.newLine();
-                                    }
-                                    TempPO_KO.put(tag.getEpc(), tag.getEpc());
-                                }
-                                Toast.makeText(mActivity, "Datos guardados en el archivo: " + currentFile_KO.getName(), Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(mActivity, "Error al guardar los datos.", Toast.LENGTH_SHORT).show();
-                            }
-                            clean_scan();
-                        }
+                        guardarDatosEnCSV(currentFile_KO, TempPO_KO, mapData);
+                        clean_scan();
                     }
                 }
             }
@@ -213,36 +191,7 @@ public class TagScanFragment extends Fragment {
                     if (scanStartBtn.getText().equals(getString(R.string.btn_stop_Inventory))) {
                         Toast.makeText(mActivity, "Detener el escaneo.", Toast.LENGTH_SHORT).show();
                     } else {
-                        nroPO.setText("");
-                        scanCountText.setText("0");
-
-                        // Limpia los datos de la lista y notifica al adaptador
-                        if (mapData != null) {
-                            mapData.clear();
-                        }
-
-                        if (data != null) {
-                            data.clear();
-                        }
-
-                        if (scanListAdapterRv != null) {
-                            scanListAdapterRv.setData(data);
-                            scanListAdapterRv.notifyDataSetChanged();
-                        }
-
-                        DatePO = null;
-                        HMSPO = null;
-                        LastFilePO = null;
-                        LastPO = null;
-
-                        if (TempPO != null) {
-                            TempPO.clear();
-                        }
-
-                        if (TempPO_KO != null) {
-                            TempPO_KO.clear();
-                        }
-
+                        clean_scan_save();
                         Toast.makeText(mActivity, "Datos de la lista limpiados.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
@@ -254,81 +203,29 @@ public class TagScanFragment extends Fragment {
         scanStartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isAdded()) {
+                if (isAdded() && validarPO(nroPO.getText().toString().trim())) {
                     String nroPOValue = nroPO.getText().toString().trim();
-
-                    if(!validarPO()) {
-                        return;
-                    }
-
-                    File directory = new File(Environment.getExternalStorageDirectory(), "RFIDLogs/Reportes");
-                    if (!directory.exists()) {
-                        System.out.println("NOOOO Existe la carpeta");
-                        directory.mkdirs();
-                    } else {
-                        System.out.println("SIIII Existe la carpeta");
-                    }
+                    currentFile = prepararArchivoCSV(nroPOValue, "RFIDLogs/Reportes", false);
 
                     if (mActivity.RFID_INIT_STATUS) {
                         if (scanStartBtn.getText().equals(getString(R.string.btInventory))) {
                             scanIncidenceBtan.setVisibility(View.VISIBLE);
-                            System.out.println("Btn era Incio");
+                            scanSaveBtn.setVisibility(View.GONE);
                             setCallback();
                             scanStartBtn.setText(getString(R.string.btn_stop_Inventory));
                             setScanStatus(true);
-                            scanSaveBtn.setVisibility(View.GONE);
-                            if(!nroPOValue.equals(LastPO)) {
-                                LastPO = nroPOValue;
-                                DatePO = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                                HMSPO = new SimpleDateFormat("HHmm ss").format(new Date());
-                                HMSPO = HMSPO.replaceAll("\\s+", "");
-                                LastFilePO = LastPO + "_" + DatePO + "_" + HMSPO+ ".csv";
-
-                                currentFile = new File(directory, LastFilePO);
-                                Log.d("FilePath", directory.getAbsolutePath());
-                            }
                         } else {
-                            System.out.println("Btn era Detener");
                             scanIncidenceBtan.setVisibility(View.GONE);
-                            scanStartBtn.setText(getString(R.string.btInventory));
-                            setScanStatus(false );
                             scanSaveBtn.setVisibility(View.VISIBLE);
-                            if (mapData.isEmpty()) {
-                                Toast.makeText(mActivity, "No hay datos para guardar.", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            //PO, DateNow, HMSNow, tag.getEpc()
-                            //Array<
-                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(currentFile, true))) {
-                                writer.write("\uFEFF"); // Escribe el BOM al inicio
-                                if (currentFile.length() == 0) {
-                                    writer.write(HEADER);
-                                    writer.newLine();
-                                }
-                                for (TagScan tag : mapData.values()) {
-                                    if (TempPO.containsKey(tag.getEpc())) {
-                                        System.out.println("Si Existe");
-                                    } else {
-                                        //String line = tag.getEpc() + "," + tag.getTid() + "," + tag.getRssi() + "," + tag.getCount();
-                                        DateNow = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                                        HMSNow = new SimpleDateFormat("HH:mm:ss").format(new Date());
-                                        String line =  Empresa_+ "," +Anexo_+ ","+LastPO + "," + DateNow + "," + HMSNow + "," + tag.getEpc();
-                                        writer.write(line);
-                                        writer.newLine();
-                                    }
-                                    TempPO.put(tag.getEpc(), tag.getEpc());
-                                }
-                                Toast.makeText(mActivity, "Datos guardados en el archivo: " + currentFile.getName(), Toast.LENGTH_SHORT).show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(mActivity, "Error al guardar los datos.", Toast.LENGTH_SHORT).show();
-                            }
+                            scanStartBtn.setText(getString(R.string.btInventory));
+                            setScanStatus(false);
+                            guardarDatosEnCSV(currentFile, TempPO, mapData);
                             clean_scan();
                         }
-                    }else {
-                        Log.d(TAG, "scanStartBtn  RFID no está inicializado "  );
-                        Toast.makeText(getActivity(),"RFID Not initialized",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "RFID no inicializado", Toast.LENGTH_SHORT).show();
                     }
+
                 } else {
                     Log.w(TAG, "Fragmento no adjunto al contexto. Operación abortada.");
                 }
@@ -356,9 +253,8 @@ public class TagScanFragment extends Fragment {
             }
         });
     }
-    private void clean_scan() {
-        scanCountText.setText("0");
 
+    private void clean_scan () {
         // Limpia los datos de la lista y notifica al adaptador
         if (mapData != null) {
             mapData.clear();
@@ -372,6 +268,30 @@ public class TagScanFragment extends Fragment {
             scanListAdapterRv.setData(new ArrayList<>());
             scanListAdapterRv.notifyDataSetChanged();
         }
+    }
+    private void clean_scan_inicidence() {
+        LastPO_KO = null;
+        LastFilePO_KO = null;
+
+        if (TempPO_KO != null) {
+            TempPO_KO.clear();
+        }
+    }
+
+    private void clean_scan_reporte() {
+        LastPO = null;
+        LastFilePO = null;
+
+        if (TempPO != null) {
+            TempPO.clear();
+        }
+    }
+    private void clean_scan_save() {
+        scanCountText.setText("0");
+        nroPO.setText("");
+
+        clean_scan_inicidence();
+        clean_scan_reporte();
     }
     private final int MSG_UPDATE_UI = 0;
     private Handler mHandler = new Handler(){
@@ -527,30 +447,26 @@ public class TagScanFragment extends Fragment {
         String mapContainStr = null;
         if (!TextUtils.isEmpty(TID)){
             mapContainStr = TID;
+            System.out.println("ES-->TID");
         }else {
             mapContainStr = s2;
+            System.out.println("ES-->S2");
         }
         final String mapContainStrFinal = mapContainStr;
-        Log.d(TAG, "onInventoryTag: EPC: aaaa" + s2);
+        Log.d(TAG, "onInventoryTag: EPC: aaaa" + s2+" mapContainStrFinal-->"+mapContainStrFinal);
         SoundTool.getInstance(BaseApplication.getContext()).playBeep(2);
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 {
-                    if (mapData.containsKey(mapContainStrFinal)) {
-                        TagScan tagScan = mapData.get(mapContainStrFinal);
-                        //tagScan.setCount(mapData.get(mapContainStrFinal).getCount() + 1);
-                        //tagScan.setTid(TID);
-                        //tagScan.setRssi(strRSSI);
-                        System.out.println("Muaa");
+                    // Si el EPC ya existe en mapData, no hacemos nada
+                    if (!mapData.containsKey(mapContainStrFinal)) {
+                        // Agregamos un TagScan simplificado solo con el EPC
+                        TagScan tagScan = new TagScan();
+                        tagScan.setEpc(mapContainStrFinal); // Solo guardamos el EPC
                         mapData.put(mapContainStrFinal, tagScan);
-                    } else {
-                        mActivity.mDataParents.add(s2);
 
-                        TagScan tagScan = new TagScan(s2, TID,strRSSI, 1);
-                        mapData.put(mapContainStrFinal, tagScan);
-                        mActivity.tagScanSpinner.add(tagScan);
-                        System.out.println("Meee");
+                        System.out.println("EPC agregado: " + mapContainStrFinal);
                     }
 
                     //scanTotalText.setText(++tagTotal + "");
@@ -562,7 +478,6 @@ public class TagScanFragment extends Fragment {
                         Log.d(TAG, "onInventoryTag: data = " + Arrays.toString(data.toArray()));
                         scanListAdapterRv.setData(data);
                         scanCountText.setText(mapData.keySet().size() + "");
-
                     }
                 }
             }
@@ -617,113 +532,84 @@ public class TagScanFragment extends Fragment {
         return byteArray;
     }
 
-    private boolean validarPO() {
-        boolean valor = true;
-        String nroPOValue = nroPO.getText().toString().trim();
-
+    private boolean validarPO(String nroPOValue) {
         if (TextUtils.isEmpty(nroPOValue)) {
-            Toast.makeText(mActivity,"El número de PO no puede estar vacío",Toast.LENGTH_SHORT).show();
-            valor = false;
+            Toast.makeText(mActivity, "El número de PO no puede estar vacío", Toast.LENGTH_SHORT).show();
+            return false;
         }
         if (nroPOValue.length() < 8) {
             Toast.makeText(mActivity, "El número de PO debe tener más de 8 caracteres", Toast.LENGTH_SHORT).show();
-            valor = false;
+            return false;
         }
-        return valor;
+        return true;
     }
     private File crearDirectorio(String rutaRelativa) {
-        // Obtiene la ruta completa del almacenamiento externo
         File directorio = new File(Environment.getExternalStorageDirectory(), rutaRelativa);
-
-        // Si el directorio no existe, lo crea
         if (!directorio.exists()) {
             directorio.mkdirs();
-        } else {
-            System.out.println("Ya se creo el archivo****"+rutaRelativa);
         }
-
-        // Devuelve el objeto File del directorio
         return directorio;
     }
-    private File crearCSV(String nroPOValue, String ruta) {
-        // Obtiene la referencia al directorio especificado
-        File directory_ = new File(Environment.getExternalStorageDirectory(), ruta);
 
-        // Verifica si el directorio existe, si no, intenta crearlo
-        if (!directory_.exists()) {
-            boolean dirCreated = directory_.mkdirs();
-            if (!dirCreated) {
-                Log.e("CSV Error", "No se pudo crear el directorio: " + directory_.getAbsolutePath());
-                Toast.makeText(mActivity, "Error al crear el directorio: " + directory_.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                return null; // Regresa null si no se puede crear el directorio
+    private File prepararArchivoCSV(String nroPOValue, String ruta, boolean isIncidence) {
+        File directorio = crearDirectorio(ruta);
+        String prefix = isIncidence ? "KO_" : "";
+
+        String fileName = null;
+
+        if(isIncidence) {
+            if (!nroPOValue.equals(LastPO_KO)) {
+                LastPO_KO = nroPOValue;
+                String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+                String time = new SimpleDateFormat("HHmmss").format(new Date());
+                time = time.replaceAll("\\s+", "");
+
+                fileName = prefix+LastPO_KO + "_" + date + "_" + time+ ".csv";
+                LastFilePO_KO = fileName;
+            } else {
+                fileName = (LastFilePO_KO !=null ) ? LastFilePO_KO : null;
+            }
+        } else {
+            if(!nroPOValue.equals(LastPO)) {
+                LastPO = nroPOValue;
+                String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+                String time = new SimpleDateFormat("HHmmss").format(new Date());
+                time = time.replaceAll("\\s+", "");
+                fileName = LastPO + "_" + date + "_" + time+ ".csv";
+
+                LastFilePO = fileName;
+            } else {
+                fileName = (LastFilePO != null ) ? LastFilePO : null;
             }
         }
-
-        // Actualiza las variables globales relacionadas con el archivo
-        LastPO = nroPOValue;  // Actualiza el PO
-        DatePO = new SimpleDateFormat("yyyyMMdd").format(new Date()); // Fecha actual en formato yyyyMMdd
-        HMSPO = new SimpleDateFormat("HHmm ss").format(new Date());   // Hora y minuto en formato HHmm ss
-        HMSPO = HMSPO.replaceAll("\\s+", "");  // Elimina cualquier espacio en blanco
-        LastFilePO = LastPO + "_" + DatePO + "_" + HMSPO + ".csv"; // Genera el nombre del archivo
-
-        // Crea la referencia al archivo dentro del directorio
-        File currentFile_ = new File(directory_, LastFilePO);
-        Log.d("CSV Creado--->", "Archivo: " + currentFile_.getAbsolutePath());
-
-        return currentFile_;
+        return new File(directorio, fileName);
     }
 
-    private void insertarLineasCSV(File currentFile_) {
-        if (currentFile_ == null) {
-            Toast.makeText(mActivity, "Error: No se pudo crear el archivo.", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        // Verifica si mapData está vacío
-        if (mapData.isEmpty()) {
-            Toast.makeText(mActivity, "No hay datos para guardar.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Escribe en el archivo CSV
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(currentFile_, true))) {
-            writer.write("\uFEFF"); // Escribe el BOM al inicio para la compatibilidad con UTF-8
-            // Si el archivo está vacío, escribe el encabezado
-            if (currentFile_.length() == 0) {
+    private void guardarDatosEnCSV(File archivo, Map<String, String> tempPO, Map<String, TagScan> dataMap) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivo, true))) {
+            writer.write("\uFEFF");
+            if (archivo.length() == 0) {
                 writer.write(HEADER);
                 writer.newLine();
             }
-
-            // Itera sobre mapData y escribe las líneas en el archivo
-            for (TagScan tag : mapData.values()) {
-                // Verifica si el EPC del tag ya existe en TempPO
-                if (!TempPO.containsKey(tag.getEpc())) {
-                    // Obtiene la fecha y hora actuales
-                    String DateNow = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                    String HMSNow = new SimpleDateFormat("HH:mm:ss").format(new Date());
-
-                    // Crea la línea que se va a escribir en el CSV
-                    String line = Empresa_ + "," + Anexo_ + "," + LastPO + "," + DateNow + "," + HMSNow + "," + tag.getEpc();
+            for (TagScan tag : dataMap.values()) {
+                if (!tempPO.containsKey(tag.getEpc())) {
+                    String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
+                    String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+                    String line = Empresa_ + "," + Anexo_ + "," + LastPO + "," + date + "," + time + "," + tag.getEpc();
                     writer.write(line);
                     writer.newLine();
+                    tempPO.put(tag.getEpc(), tag.getEpc());
                 }
-
-                // Agrega el EPC al mapa TempPO para evitar que se vuelva a insertar
-                TempPO.put(tag.getEpc(), tag.getEpc());
             }
-
-            // Muestra un mensaje de éxito
-            Toast.makeText(mActivity, "Datos guardados en el archivo: " + currentFile_.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, "Datos guardados en: " + archivo.getName(), Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            // Muestra un mensaje de error en caso de que haya problemas al guardar el archivo
             Toast.makeText(mActivity, "Error al guardar los datos.", Toast.LENGTH_SHORT).show();
         }
-
-        // Limpiar la operación de escaneo
-        clean_scan();
-        isScanning = false;
     }
+
     public void toggleScan() {
         System.out.println("Llego--> toggleScan");
         if (scanStartBtn.getText().equals(getString(R.string.btInventory))) {
@@ -737,4 +623,77 @@ public class TagScanFragment extends Fragment {
             System.out.println("Deteniendo escaneo...");
         }
     }
+
+    public void apiDespacho() {
+        // Ejecutar la llamada al API en un hilo separado
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                // Crear la URL
+                URL url = new URL(UrlApi);
+
+                // Establecer la conexión
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("Authorization", "Bearer "+global.getTokenAuthApi()); // Agregar Bearer token
+                urlConnection.setDoOutput(true);
+
+                // Crear el cuerpo del POST
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("po", LastPO);
+                requestBody.put("cantidad", scanCountText.getText());
+                requestBody.put("empresa", Empresa_);
+                requestBody.put("local", Anexo_);
+
+                // Enviar la solicitud
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(requestBody.toString().getBytes("UTF-8"));
+                os.close();
+
+                // Leer la respuesta
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // API responded with success
+                    InputStream is = urlConnection.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    is.close();
+
+                    // Log success
+                    logToFile("PO:"+LastPO+" Empresa:"+Empresa_+" Anexo:"+Anexo_+" URL: " + UrlApi + "\nResponse: " + response.toString() + "\nFecha: " + new Date());
+                } else {
+                    // Log error
+                    logToFile("PO:"+LastPO+" Empresa:"+Empresa_+" Anexo:"+Anexo_+" URL: " + UrlApi + "\nError: " + urlConnection.getResponseMessage() + "\nFecha: " + new Date());
+                }
+
+            } catch (Exception e) {
+                // Log exception
+                logToFile("PO:"+LastPO+" Empresa:"+Empresa_+" Anexo:"+Anexo_+" URL: " + UrlApi + "\nError: " + e.getMessage() + "\nFecha: " + new Date());
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+        }).start();
+    }
+
+    private void logToFile(String logMessage) {
+        File logDirectory = new File(Environment.getExternalStorageDirectory(), "RFIDLogs");
+        if (!logDirectory.exists()) {
+            logDirectory.mkdirs();
+        }
+
+        File logFile = new File(logDirectory, "api_log.txt");
+        try (FileWriter writer = new FileWriter(logFile, true)) {
+            writer.write(logMessage + "\n\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

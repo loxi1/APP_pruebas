@@ -44,6 +44,8 @@
     <string name="rbInventoryLoop">循环</string>
     <string name="btInventory">开始扫描</string>
     <string name="btn_stop_Inventory">停止扫描</string>
+    <string name="btn_incidence_Inventory">INCIDENCIA</string>
+    <string name="btn_clear_Inventory">Limpiar</string>
     <string name="title_stoping_Inventory">停止中</string>
     <string name="btStoping">停止中</string>
     <string name="_6b_tag_activity">6B标签</string>
